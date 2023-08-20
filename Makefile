@@ -1,4 +1,4 @@
-OBJECTS = loader.o string.o display.o mem.o kmain.o
+OBJECTS = loader.o serial.o string.o display.o mem.o kmain.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c
 LDFLAGS = -T link.ld -melf_i386
@@ -15,7 +15,7 @@ os.iso: kernel.elf
 	genisoimage -R -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -A os -input-charset utf8 -quiet -boot-info-table -o os.iso iso
 
 run: os.iso
-	qemu-system-i386 -D ./qemu.log --drive media=cdrom,file=os.iso,readonly=on
+	qemu-system-i386 -d int,cpu_reset -D ./qemu.log -no-reboot --drive media=cdrom,file=os.iso,readonly=on
 
 %.o: %.c
 	$(CC) $(CFLAGS) $< -o $@

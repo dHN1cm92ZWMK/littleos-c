@@ -5,5 +5,6 @@ void putch(unsigned char x, unsigned char y, char c);
 void putstr(unsigned char x, unsigned char y, const char *str);
 void clear_screen(); 
 void roll_putstr(const char *str); 
+void set_cursor(unsigned char x, unsigned char y);
 
 #endif

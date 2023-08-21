@@ -1,6 +1,7 @@
 global loader
 global outb
 global inb
+global load_gdt
 extern kmain
 
 MAGIC_NUMBER equ 0x1BADB002
@@ -26,6 +27,11 @@ align 4
 ;	mov edx, 0x534d4150
 ;	mov ecx, 24
 ;	mov eax, 0xe820
+
+load_gdt:
+	mov eax, [esp+4] 
+	lgdt [eax]
+	ret
 	
 outb:
 	mov al, [esp + 8]
@@ -37,9 +43,6 @@ inb:
 	mov dx, [esp + 4]
 	in al, dx
 	ret
-
-
-
 
 loader:
 	mov eax, 0xCAFEBABE

@@ -3,6 +3,7 @@
 
 #include "mem.h"
 
+// GDT
 struct gdt_table {
 	unsigned short limit;
 	unsigned int base;
@@ -24,4 +25,23 @@ void set_gdt_entry(struct gdt_entry *ptr,
 		unsigned char access); 
 void load_gdt(const struct gdt_table *gdt);
 
+// IDT
+struct idt_table {
+	unsigned short limit;
+	unsigned int base;
+} __attribute__((packed));
+
+struct idt_entry {
+	unsigned short offset0;
+	unsigned short segment;
+	unsigned char reserved;
+	unsigned char flags;
+	unsigned short offset1;
+};
+
+void set_idt_entry(struct idt_entry *ptr,
+		unsigned int offset,
+		unsigned short segment,
+		unsigned char flags); 
+void load_idt(const struct idt_table *idt);
 #endif

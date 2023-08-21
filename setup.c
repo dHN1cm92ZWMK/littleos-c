@@ -12,3 +12,13 @@ void set_gdt_entry(struct gdt_entry *ptr,
 	ptr->flags_limit = (flags << 4) | ((limit >> 16) & 0x0f);
 	ptr->base2 = (base >> 24) & 0xff;
 }
+
+void set_idt_entry(struct idt_entry *ptr,
+		unsigned int offset,
+		unsigned short segment,
+		unsigned char flags) {
+	ptr->offset0 = offset & 0xffff;
+	ptr->offset1 = offset >> 16;
+	ptr->segment = segment;
+	ptr->flags = flags;
+}

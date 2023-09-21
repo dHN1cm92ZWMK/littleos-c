@@ -3,6 +3,7 @@
 #include "string.h"
 #include "serial.h"
 #include "setup.h"
+#include "io.h"
 
 void gdt_loading_demo();
 void idt_loading_demo();

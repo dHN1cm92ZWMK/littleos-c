@@ -1,9 +1,14 @@
 global loader
 global outb
 global inb
+global io_wait
 global load_gdt
 global load_idt
-global dummy_handler
+
+global dummy_interrupt_handler
+global halting_interrupt_handler
+global keyboard_interrupt_handler
+
 extern kmain
 
 MAGIC_NUMBER equ 0x1BADB002
@@ -46,18 +51,99 @@ outb:
 	out dx, al
 	ret
 
+io_wait:
+	xor al, al
+	out 0x80, al
+	ret
+
 inb:
 	mov dx, [esp + 4]
 	in al, dx
 	ret
 
-dummy_handler: ; dummy, just outputs to serial and halts
-	push 0x21 ; !
+;dummy_handler: ; dummy, just outputs to serial and halts
+;	push 0x24 ; $
+;	push 0x3f8
+;	call outb
+;	call outb
+;	call outb
+;	nop
+;	hlt
+;	iret
+
+dummy_interrupt_handler: ; doesn't do anything
+	pusha
+	popa
+	iret
+
+halting_interrupt_handler: ; just halts
+	hlt
+
+keyboard_interrupt_handler:
+	pusha
+
+
+	push 0x7e
 	push 0x3f8
 	call outb
-	nop
-	hlt
+	call outb
+	call outb
+
+	pop ax
+	pop ax
+	xor eax, eax
+
+	; read from keyboard
+	in al, 0x60
+	;mov ebx, 0x12345
+	;mov byte [ebx], al
+
+	push eax
+	xor ebx, ebx
+	mov bl, al
+
+	; DBG output to serial
+	; first digit
+	shr bl, 4
+	cmp bl, 9
+	jg .letter1
+	add bl, 0x30
+	jmp .print1
+.letter1:
+	add bl, 0x57 ; 0xe -> 'e' etc. 
+	
+.print1:
+	push ebx ; ascii code
+	push 0x3f8
+	call outb
+	add esp, 8 
+
+	; second digit
+	pop ebx
+	and bl, 0xf
+	cmp bl, 9
+	jg .letter2
+	add bl, 0x30
+	jmp .print2
+.letter2:
+	add bl, 0x57
+	
+	; DBG output to serial
+.print2:
+	push ebx ; ascii code
+	push 0x3f8
+	call outb
+	add esp, 8 
+
+	; ack handling
+	mov al, 0x20
+	out 0x20, al
+
+	popa
+	add esp, 4 ; why do I need to do this?
+	;hlt ; halt to check stack now
 	iret
+
 
 loader:
 	mov eax, 0xCAFEBABE

@@ -58,7 +58,10 @@ unsigned long kmain() {
 	serial_test();
 	putch(0, 24, 'y');
 
-	idt_loading_demo();
+	setup_idt();
+	setup_pic();
+
+	asm volatile("sti"); // enable interupts
 
 	return 0x12345678;
 }
@@ -79,18 +82,4 @@ void gdt_loading_demo() {
 	load_gdt(gdt_table);
 
 	asm volatile ("mov $0x28, %eax\nmov %ax, %ds\nhlt"); // set the sixth to DS and halt
-}
-
-void dummy_handler();
-void idt_loading_demo() {
-	struct idt_entry *idt = kmalloc(256 * sizeof(struct idt_entry));
-	for(int i = 0; i < 256; i++) {
-		set_idt_entry(idt + i, (unsigned int)dummy_handler, 0x08, 0x8e); // 8e=kernel 32 bit interrupt
-	}
-	struct idt_table *idt_table = kmalloc(sizeof(struct idt_table));
-	idt_table->limit = 0x3ff;
-	idt_table->base = (unsigned int)idt;
-	load_idt(idt_table);
-
-	asm volatile ("int $80"); // invoke any interrupt; it should enter to dummy handler and halt there
 }

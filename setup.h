@@ -2,6 +2,7 @@
 #define __SETUP_H__
 
 #include "mem.h"
+#include "io.h"
 
 // GDT
 struct gdt_table {
@@ -44,4 +45,7 @@ void set_idt_entry(struct idt_entry *ptr,
 		unsigned short segment,
 		unsigned char flags); 
 void load_idt(const struct idt_table *idt);
+
+void setup_idt();
+void setup_pic();
 #endif
